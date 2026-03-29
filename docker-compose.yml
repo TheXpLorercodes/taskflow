@@ -1,0 +1,61 @@
+version: '3.9'
+
+services:
+  mongo:
+    image: mongo:7
+    container_name: taskflow_mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: secret
+      MONGO_INITDB_DATABASE: taskflow
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - taskflow_net
+
+  redis:
+    image: redis:7-alpine
+    container_name: taskflow_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    networks:
+      - taskflow_net
+
+  api:
+    build: ./backend
+    container_name: taskflow_api
+    restart: unless-stopped
+    env_file: ./backend/.env
+    environment:
+      MONGODB_URI: mongodb://admin:secret@mongo:27017/taskflow?authSource=admin
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongo
+      - redis
+    networks:
+      - taskflow_net
+    volumes:
+      - ./backend/logs:/app/logs
+
+  frontend:
+    build: ./frontend
+    container_name: taskflow_frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
+    networks:
+      - taskflow_net
+
+volumes:
+  mongo_data:
+
+networks:
+  taskflow_net:
+    driver: bridge

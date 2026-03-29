@@ -1,0 +1,118 @@
+{
+  "info": {
+    "name": "TaskFlow API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:5000/api/v1" },
+    { "key": "token", "value": "" },
+    { "key": "refreshToken", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/auth/register",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"Password1\",\n  \"confirmPassword\": \"Password1\"\n}" }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [{ "listen": "test", "script": { "exec": ["const d=pm.response.json(); if(d.data){ pm.collectionVariables.set('token',d.data.token); pm.collectionVariables.set('refreshToken',d.data.refreshToken); }"] } }],
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"Password1\"\n}" }
+          }
+        },
+        {
+          "name": "Get Me",
+          "request": {
+            "method": "GET", "url": "{{baseUrl}}/auth/me",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/auth/refresh-token",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}" }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/auth/logout",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tasks",
+      "item": [
+        {
+          "name": "Get All Tasks",
+          "request": {
+            "method": "GET", "url": { "raw": "{{baseUrl}}/tasks?page=1&limit=10", "host": ["{{baseUrl}}"], "path": ["tasks"], "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "10" }] },
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        },
+        {
+          "name": "Create Task",
+          "request": {
+            "method": "POST", "url": "{{baseUrl}}/tasks",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"title\": \"Build REST API\",\n  \"description\": \"Implement full CRUD with auth\",\n  \"priority\": \"high\",\n  \"status\": \"in-progress\",\n  \"tags\": [\"backend\", \"api\"]\n}" }
+          }
+        },
+        {
+          "name": "Update Task",
+          "request": {
+            "method": "PATCH", "url": "{{baseUrl}}/tasks/:id",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"completed\"\n}" }
+          }
+        },
+        {
+          "name": "Delete Task",
+          "request": {
+            "method": "DELETE", "url": "{{baseUrl}}/tasks/:id",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        },
+        {
+          "name": "Task Stats",
+          "request": {
+            "method": "GET", "url": "{{baseUrl}}/tasks/stats",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET", "url": "{{baseUrl}}/tasks/admin/users",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        },
+        {
+          "name": "Toggle User Status",
+          "request": {
+            "method": "PATCH", "url": "{{baseUrl}}/tasks/admin/users/:userId/toggle",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        }
+      ]
+    }
+  ]
+}
